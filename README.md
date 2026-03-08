@@ -41,6 +41,148 @@ Projects:
 All clusters attach to the same VPC subnets.
 
 ---
+## Detailed Architecture
+
+### Project Structure Overview
+
+```
+GCP-DEVOPS/
+├── 📋 Documentation
+│   ├── README.md                                    # Main documentation
+│   └── FREE_TIER_SETUP_GUIDE.md                     # Free tier setup guide
+│
+├── 🐳 Application & Containers
+│   ├── app/
+│   │   ├── main.py                                  # Python application
+│   │   ├── Dockerfile                               # Container definition
+│   │   ├── requirements.txt                         # Dependencies
+│   │   └── helm-chart/                              # K8s Helm charts
+│   │       ├── Chart.yaml
+│   │       ├── values.yaml
+│   │       └── templates/
+│   │           ├── deployment.yaml
+│   │           ├── service.yaml
+│   │           └── _helpers.tpl
+│
+├── 🔄 GitOps Configuration
+│   └── gitops/                                       # ArgoCD values
+│       ├── dev/values-dev.yaml
+│       ├── qa/values-qa.yaml
+│       └── prod/values-prod.yaml
+│
+└── 🏗️ Infrastructure as Code
+    └── terraform/
+        ├── bootstrap/                               # Initial setup (manual)
+        ├── common/                                  # Shared resources
+        ├── envs/                                    # Environment configs
+        │   ├── dev/
+        │   ├── qa/
+        │   └── prod/
+        └── modules/                                 # Reusable components
+            ├── projects/
+            ├── network/
+            ├── gke/
+            ├── iam/
+            ├── artifact_registry/
+            ├── argocd/
+            └── shared_vpc_attachment/
+```
+
+### Complete Infrastructure Flow
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                GITHUB REPOSITORY                              │
+│  ├─ Application Code (Python/Flask) → Dockerfile → Container Image          │
+│  ├─ Helm Charts (app/helm-chart/)                                           │
+│  ├─ Terraform IaC (terraform/)                                              │
+│  └─ GitOps Config (gitops/{dev,qa,prod}/)                                   │
+└────────────────────────┬───────────────────────────────────────────────────┘
+                         │
+         ┌───────────────┼───────────────┐
+         │               │               │
+    CI/CD PIPELINE  TERRAFORM WORKFLOW  ARGOCD SYNC
+    (GitHub Actions) (Bootstrap→Common  (Pull-based
+         │            →Envs)            Deployment)
+         │               │               │
+         └───────────────┼───────────────┘
+                         │
+    ┌────────────────────────────────────────────────────────┐
+    │         GCP (Google Cloud Platform)                │
+    │                                                    │
+    │  ┌──────────────────────────────────────────────┐ │
+    │  │   BOOTSTRAP (One-time, Manual)               │ │
+    │  │  [GCP Project | SA | WIF | State Bucket]    │ │
+    │  └──────────────────────────────────────────────┘ │
+    │                      │                            │
+    │                      ↓                            │
+    │  ┌──────────────────────────────────────────────┐ │
+    │  │  COMMON (Shared VPC Host Project)            │ │
+    │  │  ┌────────────────────────────────────────┐  │ │
+    │  │  │  Shared VPC Network (10.0.0.0/24)     │  │ │
+    │  │  │  - Subnets (us-central1, us-east1)   │  │ │
+    │  │  │  - GKE Node SA                        │  │ │
+    │  │  └────────────────────────────────────────┘  │ │
+    │  └──────────────────────────────────────────────┘ │
+    │           │              │              │        │
+    │           ↓              ↓              ↓        │
+    │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ │
+    │  │  DEV PROJECT │ │  QA PROJECT  │ │ PROD PROJECT │ │
+    │  │              │ │              │ │              │ │
+    │  │ [Attach VPC] │ │ [Attach VPC] │ │ [Attach VPC] │ │
+    │  │              │ │              │ │              │ │
+    │  │ ┌──────────┐ │ │ ┌──────────┐ │ │ ┌──────────┐ │ │
+    │  │ │GKE Dev  │ │ │ │GKE QA    │ │ │ │GKE Prod │ │ │
+    │  │ │Cluster  │ │ │ │Cluster   │ │ │ │Cluster  │ │ │
+    │  │ └──────────┘ │ │ └──────────┘ │ │ └──────────┘ │ │
+    │  │              │ │              │ │              │ │
+    │  │ ┌──────────┐ │ │ ┌──────────┐ │ │ ┌──────────┐ │ │
+    │  │ │Artifact  │ │ │ │Artifact  │ │ │ │Artifact  │ │ │
+    │  │ │Registry  │ │ │ │Registry  │ │ │ │Registry  │ │ │
+    │  │ └──────────┘ │ │ └──────────┘ │ │ └──────────┘ │ │
+    │  │              │ │              │ │              │ │
+    │  │ ┌──────────┐ │ │ ┌──────────┐ │ │ ┌──────────┐ │ │
+    │  │ │ArgoCD    │ │ │ │ArgoCD    │ │ │ │ArgoCD    │ │ │
+    │  │ │App (Dev) │ │ │ │App (QA)  │ │ │ │App (Prod)│ │ │
+    │  │ └──────────┘ │ │ └──────────┘ │ │ └──────────┘ │ │
+    │  └──────────────┘ └──────────────┘ └──────────────┘ │
+    │         │              │              │              │
+    │         └──────────────┴──────────────┘              │
+    │                      │                              │
+    │                      ↓                              │
+    │         ┌──────────────────────────┐               │
+    │         │ GitOps (ArgoCD Sync)     │               │
+    │         │ Helm Values (values-x.yaml) │            │
+    │         │ Deployment Management    │               │
+    │         └──────────────────────────┘               │
+    │                                                    │
+    └────────────────────────────────────────────────────┘
+```
+
+### Application Deployment Flow
+
+```
+STEP 1: CODE CHANGES → STEP 2: CI/CD BUILD → STEP 3: ARTIFACT REGISTRY
+   ↓                      ↓                      ↓
+App Code             Docker Image          Container Images
+Dockerfile           GitHub Actions        (dev/qa/prod tags)
+Helm Values          Build & Push              ↓
+   │                    │                      │
+   └────────────────────┴──────────────────────┘
+                         ↓
+            STEP 4: ARGOCD MONITORS & SYNCS
+            ├─ Watches: gitops/{env}/values-{env}.yaml
+            ├─ Watches: app/helm-chart/
+            └─ Auto-syncs every 3 minutes
+                         ↓
+            STEP 5: KUBERNETES DEPLOYMENT
+            ├─ Pulls image from Artifact Registry
+            ├─ Starts Pod with Helm values
+            ├─ Service exposes application
+            └─ Workload Identity binds to GCP SA
+```
+
+---
 ## Getting started
 
 1. **Create the GCP projects** (you can also manage them via Terraform).
