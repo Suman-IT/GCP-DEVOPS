@@ -1,1 +1,2 @@
-bucket = "gcp-devops-terraform-state"`nprefix = "dev/terraform"
+bucket = "gcp-devops-terraform-state"
+prefix = "dev/terraform"

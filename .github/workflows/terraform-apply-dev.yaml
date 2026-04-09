@@ -65,8 +65,15 @@ jobs:
           terraform plan \
             -var-file=terraform.tfvars \
             -out=tfplan \
-            -lock=false > plan.txt 2>&1 || true
-          cat plan.txt
+            -lock=false 2>&1 | tee plan.txt
+
+      - name: Show Plan Details
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          echo "=== Terraform Plan Output ===" 
+          terraform show -no-color tfplan | tee -a plan.txt
+          echo "\n=== Plan Summary ===" 
+          terraform show -no-color tfplan | grep -E '(Plan:|No changes|Will be|Must be)' || true
 
       - name: Upload Plan
         uses: actions/upload-artifact@v4
@@ -82,12 +89,22 @@ jobs:
           script: |
             const fs = require('fs');
             const planOutput = fs.readFileSync('${{ env.TERRAFORM_DIR }}/plan.txt', 'utf8');
-            const commentBody = `## Terraform Plan - Dev Environment\n\`\`\`\n${planOutput.substring(0, 3000)}\n\`\`\``;
+            const lines = planOutput.split('\n');
+            const resources = lines.filter(l => /^(\s+\+|-|~|=>)/.test(l));
+            const summary = lines.filter(l => /^Plan:|^No changes|^Terraform will|^(Apply|Destroy) complete/.test(l)).join('\n');
+            
+            let body = '## 📋 Terraform Plan - Dev Environment\n\n';
+            if (summary) body += `### Summary\n\`\`\`\n${summary}\n\`\`\`\n\n`;
+            if (resources.length > 0) {
+              body += `### Resources (${resources.length})\n\`\`\`diff\n${resources.slice(0, 100).join('\n')}${resources.length > 100 ? '\n... ' + (resources.length - 100) + ' more resources' : ''}\n\`\`\`\n`;
+            }
+            body += '\n**Full plan output available in [workflow logs](${workflow_url})**';
+            
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: commentBody
+              body: body
             });
 
   apply:
