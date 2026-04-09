@@ -1,0 +1,40 @@
+### Bootstrap Project ###
+
+project_id = "shared-vpc-host-project-492811"
+project_number = 399031706541
+state_bucket = "gcp-devops-terraform-state"
+terraform_sa_email = "terraform-sa@shared-vpc-host-project-492811.iam.gserviceaccount.com"
+workload_identity_pool_id = "github-pool"
+workload_identity_provider_id = "github-provider"
+
+### Common Terraform Output ####
+
+host_project_id = "shared-vpc-host-project-492811"
+network_name = "shared-vpc"
+network_self_link = "https://www.googleapis.com/compute/v1/projects/shared-vpc-host-project-492811/global/networks/shared-vpc"
+node_service_account_email = "gke-node-sa@shared-vpc-host-project-492811.iam.gserviceaccount.com"
+subnet_self_links = [
+  "https://www.googleapis.com/compute/v1/projects/shared-vpc-host-project-492811/regions/asia-southeast1/subnetworks/subnet-dev",
+  "https://www.googleapis.com/compute/v1/projects/shared-vpc-host-project-492811/regions/asia-south1/subnetworks/subnet-qa",
+  "https://www.googleapis.com/compute/v1/projects/shared-vpc-host-project-492811/regions/asia-northeast1/subnetworks/subnet-prod",
+]
+subnets = tolist([
+  {
+    "cidr" = "10.1.0.0/24"
+    "name" = "subnet-dev"
+    "region" = "asia-southeast1"
+  },
+  {
+    "cidr" = "10.2.0.0/24"
+    "name" = "subnet-qa"
+    "region" = "asia-south1"
+  },
+  {
+    "cidr" = "10.3.0.0/24"
+    "name" = "subnet-prod"
+    "region" = "asia-northeast1"
+  },
+])
+
+### Service Projects ###
+Dev project number = 657523974370 ( dev-project-492813 )

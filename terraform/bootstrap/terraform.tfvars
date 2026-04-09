@@ -12,12 +12,12 @@
 #   - Set create_project to true (optional, can still be false)
 # ==============================================================================
 
-project_id        = "your-common-project-id"
-project_number    = 123456789012
-region            = "us-central1"
+project_id        = "shared-vpc-host-project-492811"  # For free tier, set to your existing project ID; for org accounts, this will be created if create_project is true
+project_number    = 399031706541
+region            = "asia-southeast1"
 org_id            = ""  # Leave empty for free tier, or provide org ID for org accounts
 billing_account   = ""  # Leave empty for free tier, or provide billing account ID
-github_org        = "your-github-org"
+github_org        = "Suman-IT"
 github_repo       = "GCP-DEVOPS"
 terraform_sa_name = "terraform-sa"
 state_bucket_name = "gcp-devops-terraform-state"

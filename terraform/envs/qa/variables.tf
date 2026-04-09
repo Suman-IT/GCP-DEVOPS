@@ -54,3 +54,79 @@ variable "gitops_revision" {
   description = "Git revision (branch/tag) for GitOps applications"
   type        = string
 }
+
+variable "host_project_id" {
+  description = "Shared VPC host project ID"
+  type        = string
+}
+
+variable "service_project_number" {
+  description = "Service project number for shared VPC attachment"
+  type        = number
+}
+
+variable "create_project" {
+  description = "Whether to create a new project"
+  type        = bool
+}
+
+// GCE Instance Variables
+variable "instance_name" {
+  description = "GCE instance name"
+  type        = string
+}
+
+variable "machine_type" {
+  description = "Machine type for GCE instance"
+  type        = string
+}
+
+variable "zone" {
+  description = "Zone for GCE instance"
+  type        = string
+}
+
+variable "boot_disk_image" {
+  description = "Boot disk image"
+  type        = string
+}
+
+variable "boot_disk_size_gb" {
+  description = "Boot disk size in GB"
+  type        = number
+}
+
+variable "boot_disk_type" {
+  description = "Boot disk type"
+  type        = string
+}
+
+variable "enable_public_ip" {
+  description = "Enable public IP for GCE instance"
+  type        = bool
+}
+
+variable "preemptible" {
+  description = "Use preemptible VM"
+  type        = bool
+}
+
+variable "vm_labels" {
+  description = "Labels for VM"
+  type        = map(string)
+}
+
+variable "vm_metadata" {
+  description = "Metadata for VM"
+  type        = map(string)
+}
+
+variable "startup_script" {
+  description = "Startup script for VM"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment name (dev, qa, prod)"
+  type        = string
+}

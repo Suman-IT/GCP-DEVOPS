@@ -18,8 +18,13 @@ terraform {
   }
 }
 
-provider "google" {}
-provider "google-beta" {}
+provider "google" {
+  impersonate_service_account = "terraform-sa@shared-vpc-host-project-492811.iam.gserviceaccount.com"
+}
+
+provider "google-beta" {
+  impersonate_service_account = "terraform-sa@shared-vpc-host-project-492811.iam.gserviceaccount.com"
+}
 
 # Argocd provider uses the ArgoCD API server endpoint and an auth token
 provider "argocd" {

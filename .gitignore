@@ -1,3 +1,99 @@
-.terraform
-*.lock.hcl
-*.tfvars
+# Terraform files
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfplan
+tfplan
+*.tfvars.json
+*.auto.tfvars
+
+# Terraform local overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+.classpath
+.project
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+Thumbs.db
+*.log
+
+# Credentials and secrets
+*.key
+*.pem
+*.p12
+key.json
+credentials.json
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist/
+build/
+*.jar
+*.war
+*.zip
+target/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# GitHub Actions artifacts
+.github/artifacts/
+
+# GCP Service Account keys (security best practice)
+*-key.json
+*-credentials.json
+service-account*.json
+
+# Terraform outputs
+outputs.json
+plan.txt
+
+# Local testing files
+test-*.tfvars
+local-*.tf
+
+# Editor temp files
+*.orig
+*.backup

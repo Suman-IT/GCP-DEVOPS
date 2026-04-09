@@ -25,10 +25,14 @@ module "common_project" {
 # enable required services for existing project
 resource "google_project_service" "required" {
   for_each = toset([
+    "compute.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "container.googleapis.com",
+    "artifactregistry.googleapis.com",
     "iam.googleapis.com",
+    "storage.googleapis.com",
     "iamcredentials.googleapis.com",
     "sts.googleapis.com",
-    "storage.googleapis.com",
   ])
   project = var.project_id
   service = each.key
@@ -69,7 +73,7 @@ resource "google_project_iam_member" "terraform_sa_roles" {
   ])
   project = var.project_id
   role    = each.key
-  member  = google_service_account.terraform_sa.email
+  member  = "serviceAccount:${google_service_account.terraform_sa.email}"
 }
 
 # workload identity pool and provider
