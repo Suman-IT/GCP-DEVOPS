@@ -19,7 +19,8 @@ on:
 
 env:
   TF_VERSION: 1.5.0
-  TERRAFORM_DIR: terraform/envs/dev
+  TERRAFORM_DIR: terraform/envs
+  ENVIRONMENT: dev
 
 jobs:
   plan:
@@ -63,7 +64,7 @@ jobs:
         working-directory: ${{ env.TERRAFORM_DIR }}
         run: |
           terraform plan \
-            -var-file=terraform.tfvars \
+            -var-file=${{ env.ENVIRONMENT }}/terraform.tfvars \
             -out=tfplan \
             -lock=false 2>&1 | tee plan.txt
 
@@ -142,9 +143,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.TERRAFORM_DIR }}
-        run: terraform init -backend-config=backend-config.hcl
-
-      - name: Download Plan
+        run: terraform init -backend-config=${{ env.ENVIRONMENT }}/backend-config.hcl
         uses: actions/download-artifact@v4
         with:
           name: dev-tfplan
