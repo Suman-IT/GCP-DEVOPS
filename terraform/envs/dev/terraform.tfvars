@@ -38,9 +38,4 @@ vm_metadata = {
   enable-oslogin = "TRUE"
 }
 
-startup_script = <<-EOT
-#!/bin/bash
-apt-get update
-apt-get install -y curl git wget
-echo "Dev VM initialization completed"
-EOT
+startup_script = "#!/bin/bash\napt-get update\napt-get install -y curl git wget\necho 'Dev VM initialization completed'"

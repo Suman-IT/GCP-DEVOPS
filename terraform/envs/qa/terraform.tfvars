@@ -38,9 +38,4 @@ vm_metadata = {
   enable-oslogin = "TRUE"
 }
 
-startup_script = <<-EOT
-  #!/bin/bash
-  apt-get update
-  apt-get install -y curl git wget
-  echo "QA VM initialization completed"
-EOT
+startup_script = "#!/bin/bash\napt-get update\napt-get install -y curl git wget\necho 'QA VM initialization completed'"

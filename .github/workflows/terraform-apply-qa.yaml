@@ -67,14 +67,20 @@ jobs:
             -lock=false 2>&1 | tee plan.txt
 
       - name: Show Plan Details
+        if: always()
         working-directory: ${{ env.TERRAFORM_DIR }}
         run: |
+          if [ ! -f tfplan ]; then
+            echo "No plan file found (plan step may have failed)"
+            exit 0
+          fi
           echo "=== Terraform Plan Output ===" 
           terraform show -no-color tfplan | tee -a plan.txt
           echo "\n=== Plan Summary ===" 
           terraform show -no-color tfplan | grep -E '(Plan:|No changes|Will be|Must be)' || true
 
       - name: Upload Plan
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: qa-tfplan
