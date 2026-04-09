@@ -39,11 +39,11 @@ module "env_project" {
   billing_account = var.billing_account
   services = {
     "cloudresourcemanager.googleapis.com" = true
-    "compute.googleapis.com"          = true
-    "serviceusage.googleapis.com"     = true
-    "container.googleapis.com"        = true
-    "artifactregistry.googleapis.com" = true
-    "iam.googleapis.com"              = true
+    "compute.googleapis.com"              = true
+    "serviceusage.googleapis.com"         = true
+    "container.googleapis.com"            = true
+    "artifactregistry.googleapis.com"     = true
+    "iam.googleapis.com"                  = true
   }
 }
 
