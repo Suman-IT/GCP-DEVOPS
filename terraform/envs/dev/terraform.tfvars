@@ -31,7 +31,7 @@ preemptible       = false
 
 vm_labels = {
   app   = "dev-app"
-  owner = "Suman"
+  owner = "suman"
   env   = "dev"
 }
 
