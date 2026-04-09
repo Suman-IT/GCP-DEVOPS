@@ -70,7 +70,9 @@ jobs:
 
       - name: Terraform Plan - Dev
         working-directory: ${{ env.TERRAFORM_DIR }}
+        shell: bash
         run: |
+          set -o pipefail
           terraform plan \
             -var-file=${{ env.TF_VARS_FILE }} \
             -out=tfplan \
@@ -79,6 +81,7 @@ jobs:
       - name: Show Plan Details
         if: always()
         working-directory: ${{ env.TERRAFORM_DIR }}
+        shell: bash
         run: |
           if [ ! -f tfplan ]; then
             echo "No plan file found (plan step may have failed)"
@@ -99,13 +102,18 @@ jobs:
           retention-days: 5
 
       - name: Comment PR with Plan
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
             const workflowUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const planOutput = fs.readFileSync('${{ env.TERRAFORM_DIR }}/plan.txt', 'utf8');
+            const planPath = '${{ env.TERRAFORM_DIR }}/plan.txt';
+            if (!fs.existsSync(planPath)) {
+              core.info(`Skipping PR comment because ${planPath} was not created.`);
+              return;
+            }
+            const planOutput = fs.readFileSync(planPath, 'utf8');
             const lines = planOutput.split('\n');
             const resources = lines.filter(l => /^(\s+\+|-|~|=>)/.test(l));
             const summary = lines.filter(l => /^Plan:|^No changes|^Terraform will|^(Apply|Destroy) complete/.test(l)).join('\n');
@@ -129,7 +137,7 @@ jobs:
     runs-on: ubuntu-latest
     
     needs: plan
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.plan.result == 'success'
     
     permissions:
       contents: read

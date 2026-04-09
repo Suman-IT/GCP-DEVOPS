@@ -8,7 +8,9 @@ provider "google" {
 // Enable required services for environment project (for existing projects)
 resource "google_project_service" "env_services" {
   for_each = toset([
+    "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
+    "serviceusage.googleapis.com",
     "container.googleapis.com",
     "artifactregistry.googleapis.com",
     "iam.googleapis.com",
@@ -36,7 +38,9 @@ module "env_project" {
   org_id          = var.org_id
   billing_account = var.billing_account
   services = {
+    "cloudresourcemanager.googleapis.com" = true
     "compute.googleapis.com"          = true
+    "serviceusage.googleapis.com"     = true
     "container.googleapis.com"        = true
     "artifactregistry.googleapis.com" = true
     "iam.googleapis.com"              = true

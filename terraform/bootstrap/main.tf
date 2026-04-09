@@ -11,7 +11,9 @@ module "common_project" {
   org_id          = var.org_id
   billing_account = var.billing_account
   services        = {
+    "cloudresourcemanager.googleapis.com" = true
     "compute.googleapis.com"       = true
+    "serviceusage.googleapis.com"  = true
     "servicenetworking.googleapis.com" = true
     "container.googleapis.com"     = true
     "artifactregistry.googleapis.com" = true
@@ -25,7 +27,9 @@ module "common_project" {
 # enable required services for existing project
 resource "google_project_service" "required" {
   for_each = toset([
+    "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
+    "serviceusage.googleapis.com",
     "servicenetworking.googleapis.com",
     "container.googleapis.com",
     "artifactregistry.googleapis.com",
