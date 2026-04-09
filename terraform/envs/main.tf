@@ -18,6 +18,15 @@ resource "google_project_service" "env_services" {
   service = each.key
 }
 
+// Grant terraform service account editor role in environment project
+resource "google_project_iam_member" "terraform_sa_env" {
+  project = var.project_id
+  role    = "roles/editor"
+  member  = "serviceAccount:terraform-sa@${var.host_project_id}.iam.gserviceaccount.com"
+
+  depends_on = [google_project_service.env_services]
+}
+
 // Create environment project (only if org_id is provided or create_project is true)
 module "env_project" {
   source          = "../modules/projects"
