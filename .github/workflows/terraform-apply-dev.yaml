@@ -6,7 +6,9 @@ on:
       - main
     paths:
       - 'terraform/envs/dev/**'
+      - 'terraform/envs/backend.tf'
       - 'terraform/envs/main.tf'
+      - 'terraform/envs/variables.tf'
       - 'terraform/modules/**'
       - '.github/workflows/terraform-apply-dev.yaml'
   pull_request:
@@ -14,13 +16,19 @@ on:
       - main
     paths:
       - 'terraform/envs/dev/**'
+      - 'terraform/envs/backend.tf'
+      - 'terraform/envs/main.tf'
+      - 'terraform/envs/variables.tf'
       - 'terraform/modules/**'
+      - '.github/workflows/terraform-apply-dev.yaml'
   workflow_dispatch:
 
 env:
   TF_VERSION: 1.5.0
   TERRAFORM_DIR: terraform/envs
   ENVIRONMENT: dev
+  TF_VARS_FILE: dev/terraform.tfvars
+  BACKEND_CONFIG_FILE: dev/backend-config.hcl
 
 jobs:
   plan:
@@ -50,7 +58,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.TERRAFORM_DIR }}
-        run: terraform init -backend-config=backend-config.hcl
+        run: terraform init -backend-config=${{ env.BACKEND_CONFIG_FILE }}
 
       - name: Terraform Format Check
         working-directory: terraform/envs
@@ -64,7 +72,7 @@ jobs:
         working-directory: ${{ env.TERRAFORM_DIR }}
         run: |
           terraform plan \
-            -var-file=${{ env.ENVIRONMENT }}/terraform.tfvars \
+            -var-file=${{ env.TF_VARS_FILE }} \
             -out=tfplan \
             -lock=false 2>&1 | tee plan.txt
 
@@ -87,6 +95,7 @@ jobs:
         with:
           name: dev-tfplan
           path: ${{ env.TERRAFORM_DIR }}/tfplan
+          if-no-files-found: warn
           retention-days: 5
 
       - name: Comment PR with Plan
@@ -95,6 +104,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
+            const workflowUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const planOutput = fs.readFileSync('${{ env.TERRAFORM_DIR }}/plan.txt', 'utf8');
             const lines = planOutput.split('\n');
             const resources = lines.filter(l => /^(\s+\+|-|~|=>)/.test(l));
@@ -105,7 +115,7 @@ jobs:
             if (resources.length > 0) {
               body += `### Resources (${resources.length})\n\`\`\`diff\n${resources.slice(0, 100).join('\n')}${resources.length > 100 ? '\n... ' + (resources.length - 100) + ' more resources' : ''}\n\`\`\`\n`;
             }
-            body += '\n**Full plan output available in [workflow logs](${workflow_url})**';
+            body += `\n**Full plan output available in [workflow logs](${workflowUrl})**`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -143,7 +153,9 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.TERRAFORM_DIR }}
-        run: terraform init -backend-config=${{ env.ENVIRONMENT }}/backend-config.hcl
+        run: terraform init -backend-config=${{ env.BACKEND_CONFIG_FILE }}
+
+      - name: Download Plan
         uses: actions/download-artifact@v4
         with:
           name: dev-tfplan
