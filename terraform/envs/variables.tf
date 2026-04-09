@@ -58,6 +58,12 @@ variable "host_project_id" {
   type        = string
 }
 
+variable "enable_shared_vpc_attachment" {
+  description = "Whether Terraform should attach the environment project to the shared VPC host project"
+  type        = bool
+  default     = true
+}
+
 variable "service_project_number" {
   description = "Service project number for shared VPC attachment"
   type        = number

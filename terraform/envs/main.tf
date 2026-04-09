@@ -49,6 +49,7 @@ module "env_project" {
 
 // Attach environment project to shared VPC
 module "shared_vpc_attachment" {
+  count                  = var.enable_shared_vpc_attachment ? 1 : 0
   source                 = "../modules/shared_vpc_attachment"
   host_project_id        = var.host_project_id
   service_project_id     = var.project_id
@@ -83,7 +84,7 @@ module "gce" {
   startup_script        = var.startup_script
   preemptible           = var.preemptible
 
-  depends_on = [module.shared_vpc_attachment]
+  depends_on = var.enable_shared_vpc_attachment ? [module.shared_vpc_attachment] : []
 }
 
 // Create GKE cluster in environment project

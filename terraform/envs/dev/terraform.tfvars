@@ -15,6 +15,7 @@ node_service_account_email = "gke-node-sa@shared-vpc-host-project-492811.iam.gse
 gitops_repo_url            = "https://github.com/Suman-IT/GCP-DEVOPS.git"
 gitops_revision            = "main"
 host_project_id            = "shared-vpc-host-project-492811"
+enable_shared_vpc_attachment = false
 service_project_number     = 657523974370
 create_project             = false
 
