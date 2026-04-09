@@ -76,6 +76,20 @@ resource "google_project_iam_member" "terraform_sa_roles" {
   member  = "serviceAccount:${google_service_account.terraform_sa.email}"
 }
 
+# grant organization-level roles (if org_id is provided)
+resource "google_organization_iam_member" "terraform_sa_org_roles" {
+  for_each = var.org_id != "" ? toset([
+    "roles/resourcemanager.projectCreator",
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/compute.xpnAdmin",
+    "roles/iam.securityAdmin",
+  ]) : toset([])
+  
+  org_id = var.org_id
+  role   = each.key
+  member = "serviceAccount:${google_service_account.terraform_sa.email}"
+}
+
 # workload identity pool and provider
 resource "google_iam_workload_identity_pool" "github_pool" {
   workload_identity_pool_id = "github-pool"
