@@ -38,4 +38,5 @@ vm_metadata = {
   enable-oslogin = "TRUE"
 }
 
+
 startup_script = "#!/bin/bash\napt-get update\napt-get install -y curl git wget\necho 'Dev VM initialization completed'"
