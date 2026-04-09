@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'terraform/envs/dev/**'
+      - 'terraform/envs/envs/main.tf'
       - 'terraform/modules/**'
       - '.github/workflows/terraform-apply-dev.yaml'
   pull_request:
