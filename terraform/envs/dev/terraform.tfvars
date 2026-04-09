@@ -19,7 +19,7 @@ service_project_number     = 657523974370
 create_project             = false
 
 # GCE Instance Configuration
-instance_name     = "dev-app-vm"
+instance_name     = "dev-test-vm"
 machine_type      = "e2-medium"
 zone              = "asia-southeast1-a"
 boot_disk_image   = "debian-cloud/debian-12"
@@ -30,7 +30,7 @@ preemptible       = false
 
 vm_labels = {
   app   = "dev-app"
-  owner = "devops"
+  owner = "Suman"
   env   = "dev"
 }
 
