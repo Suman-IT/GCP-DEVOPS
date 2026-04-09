@@ -39,8 +39,8 @@ vm_metadata = {
 }
 
 startup_script = <<-EOT
-  #!/bin/bash
-  apt-get update
-  apt-get install -y curl git wget
-  echo "Dev VM initialization completed"
+#!/bin/bash
+apt-get update
+apt-get install -y curl git wget
+echo "Dev VM initialization completed"
 EOT
