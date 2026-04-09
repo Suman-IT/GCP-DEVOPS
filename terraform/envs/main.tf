@@ -84,7 +84,7 @@ module "gce" {
   startup_script        = var.startup_script
   preemptible           = var.preemptible
 
-  depends_on = var.enable_shared_vpc_attachment ? [module.shared_vpc_attachment] : []
+  depends_on = [module.shared_vpc_attachment]
 }
 
 // Create GKE cluster in environment project
