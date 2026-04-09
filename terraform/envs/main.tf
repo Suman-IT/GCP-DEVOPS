@@ -15,6 +15,7 @@ resource "google_project_service" "env_services" {
     "artifactregistry.googleapis.com",
     "iam.googleapis.com",
     "servicenetworking.googleapis.com",
+    "storage.googleapis.com",
   ])
   project = var.project_id
   service = each.key
@@ -44,17 +45,18 @@ module "env_project" {
     "container.googleapis.com"            = true
     "artifactregistry.googleapis.com"     = true
     "iam.googleapis.com"                  = true
+    "storage.googleapis.com"              = true
   }
 }
 
-// Attach environment project to shared VPC
-module "shared_vpc_attachment" {
-  count                  = var.enable_shared_vpc_attachment ? 1 : 0
-  source                 = "../modules/shared_vpc_attachment"
-  host_project_id        = var.host_project_id
-  service_project_id     = var.project_id
-  service_project_number = var.service_project_number
-}
+// Shared VPC attachment is commented out for free-tier testing.
+// module "shared_vpc_attachment" {
+//   count                  = var.enable_shared_vpc_attachment ? 1 : 0
+//   source                 = "../modules/shared_vpc_attachment"
+//   host_project_id        = var.host_project_id
+//   service_project_id     = var.project_id
+//   service_project_number = var.service_project_number
+// }
 
 // Create artifact registry in environment project
 module "artifact" {
@@ -64,51 +66,45 @@ module "artifact" {
   repository_id = var.artifact_repo_id
 }
 
-// Create GCE instance in environment project
-module "gce" {
-  source                = "../modules/gce"
-  project_id            = var.project_id
-  environment           = var.environment
-  instance_name         = var.instance_name
-  machine_type          = var.machine_type
-  zone                  = var.zone
-  boot_disk_image       = var.boot_disk_image
-  boot_disk_size_gb     = var.boot_disk_size_gb
-  boot_disk_type        = var.boot_disk_type
-  network               = var.network_self_link
-  subnetwork            = var.subnet_self_link
-  enable_public_ip      = var.enable_public_ip
-  service_account_email = var.node_service_account_email
-  labels                = var.vm_labels
-  metadata              = var.vm_metadata
-  startup_script        = var.startup_script
-  preemptible           = var.preemptible
+// Create a simple GCS bucket in the environment project for free-tier validation
+resource "google_storage_bucket" "env_bucket" {
+  name     = var.storage_bucket_name
+  project  = var.project_id
+  location = var.region
 
-  depends_on = [module.shared_vpc_attachment]
+  storage_class               = var.storage_bucket_storage_class
+  uniform_bucket_level_access = true
+  force_destroy               = var.storage_bucket_force_destroy
+
+  labels = {
+    environment = var.environment
+    managed_by  = "terraform"
+  }
+
+  depends_on = [google_project_service.env_services]
 }
 
-// Create GKE cluster in environment project
-# module "gke" {
-#   source             = "../modules/gke"
-#   project_id         = var.project_id
-#   region             = var.region
-#   cluster_name       = var.cluster_name
-#   network            = var.network_self_link
-#   subnetwork         = var.subnet_self_link
-#   node_service_account = var.node_service_account_email
-
-#   depends_on = [module.shared_vpc_attachment]
-# }
-
-// ArgoCD application for the environment
-# module "argocd_app" {
-#   source = "../modules/argocd"
-
-#   name               = "demo-app-${var.environment}"
-#   repo_url           = var.gitops_repo_url
-#   path               = "gitops/${var.environment}"
-#   target_revision    = var.gitops_revision
-#   destination_server = module.gke.kubernetes_api_server
-#   destination_namespace = "default"
-#   value_files        = ["values-${var.environment}.yaml"]
-# }
+// GCE is commented out for free-tier testing.
+// Re-enable after moving to an org-backed setup or after switching dev to a
+// project-local network instead of the host project's Shared VPC.
+// module "gce" {
+//   source                = "../modules/gce"
+//   project_id            = var.project_id
+//   environment           = var.environment
+//   instance_name         = var.instance_name
+//   machine_type          = var.machine_type
+//   zone                  = var.zone
+//   boot_disk_image       = var.boot_disk_image
+//   boot_disk_size_gb     = var.boot_disk_size_gb
+//   boot_disk_type        = var.boot_disk_type
+//   network               = var.network_self_link
+//   subnetwork            = var.subnet_self_link
+//   enable_public_ip      = var.enable_public_ip
+//   service_account_email = var.node_service_account_email
+//   labels                = var.vm_labels
+//   metadata              = var.vm_metadata
+//   startup_script        = var.startup_script
+//   preemptible           = var.preemptible
+//
+//   depends_on = [module.shared_vpc_attachment]
+// }
