@@ -32,17 +32,12 @@ resource "google_compute_instance" "vm" {
   metadata = merge(
     {
       enable-oslogin           = "TRUE"
-      block-project-ssh-keys   = false
+      block-project-ssh-keys   = "FALSE"
     },
     var.metadata
   )
 
-  dynamic "metadata_startup_script" {
-    for_each = var.startup_script != null ? [var.startup_script] : []
-    content {
-      content = metadata_startup_script.value
-    }
-  }
+  metadata_startup_script = var.startup_script
 
   service_account {
     email  = var.service_account_email
