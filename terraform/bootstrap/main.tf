@@ -80,6 +80,33 @@ resource "google_project_iam_member" "terraform_sa_roles" {
   member  = "serviceAccount:${google_service_account.terraform_sa.email}"
 }
 
+locals {
+  terraform_sa_managed_projects = distinct(concat([var.project_id], var.additional_project_ids))
+  terraform_sa_admin_roles = toset([
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/compute.xpnAdmin",
+  ])
+}
+
+# grant cross-project admin roles needed for environment IAM updates and Shared VPC attachment
+resource "google_project_iam_member" "terraform_sa_project_admin_roles" {
+  for_each = {
+    for entry in flatten([
+      for project_id in local.terraform_sa_managed_projects : [
+        for role in local.terraform_sa_admin_roles : {
+          key        = "${project_id}:${role}"
+          project_id = project_id
+          role       = role
+        }
+      ]
+    ]) : entry.key => entry
+  }
+
+  project = each.value.project_id
+  role    = each.value.role
+  member  = "serviceAccount:${google_service_account.terraform_sa.email}"
+}
+
 # grant organization-level roles (if org_id is provided)
 resource "google_organization_iam_member" "terraform_sa_org_roles" {
   for_each = var.org_id != "" ? toset([

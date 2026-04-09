@@ -76,7 +76,7 @@ jobs:
           terraform plan \
             -var-file=${{ env.TF_VARS_FILE }} \
             -out=tfplan \
-            -lock=false 2>&1 | tee plan.txt
+            -lock-timeout=5m 2>&1 | tee plan.txt
 
       - name: Show Plan Details
         if: always()
@@ -93,7 +93,7 @@ jobs:
           terraform show -no-color tfplan | grep -E '(Plan:|No changes|Will be|Must be)' || true
 
       - name: Upload Plan
-        if: always()
+        if: always() && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: dev-tfplan
@@ -163,11 +163,15 @@ jobs:
         working-directory: ${{ env.TERRAFORM_DIR }}
         run: terraform init -backend-config=${{ env.BACKEND_CONFIG_FILE }}
 
-      - name: Download Plan
-        uses: actions/download-artifact@v4
-        with:
-          name: dev-tfplan
-          path: ${{ env.TERRAFORM_DIR }}
+      - name: Terraform Plan For Apply - Dev
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          terraform plan \
+            -var-file=${{ env.TF_VARS_FILE }} \
+            -out=tfplan \
+            -lock-timeout=5m
 
       - name: Terraform Apply - Dev
         working-directory: ${{ env.TERRAFORM_DIR }}

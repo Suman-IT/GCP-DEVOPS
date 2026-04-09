@@ -53,3 +53,9 @@ variable "create_project" {
   type        = bool
   default     = false
 }
+
+variable "additional_project_ids" {
+  description = "Additional project IDs where the Terraform service account should receive IAM admin and Shared VPC admin roles"
+  type        = list(string)
+  default     = []
+}

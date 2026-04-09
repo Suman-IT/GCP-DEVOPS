@@ -22,3 +22,6 @@ github_repo       = "GCP-DEVOPS"
 terraform_sa_name = "terraform-sa"
 state_bucket_name = "gcp-devops-terraform-state"
 create_project    = false  # Set to false for free tier (project already exists)
+additional_project_ids = [
+  "dev-project-492813",
+]
