@@ -12,11 +12,11 @@ module "prod_project" {
   project_id      = var.project_id
   org_id          = var.org_id
   billing_account = var.billing_account
-  services        = {
-    "compute.googleapis.com"       = true
-    "container.googleapis.com"     = true
+  services = {
+    "compute.googleapis.com"          = true
+    "container.googleapis.com"        = true
     "artifactregistry.googleapis.com" = true
-    "iam.googleapis.com"           = true
+    "iam.googleapis.com"              = true
   }
 }
 
@@ -30,23 +30,23 @@ module "artifact" {
 
 // Create GKE cluster in prod project
 module "gke" {
-  source             = "../../modules/gke"
-  project_id         = var.project_id
-  region             = var.region
-  cluster_name       = var.cluster_name
-  network            = var.network_self_link
-  subnetwork         = var.subnet_self_link
+  source               = "../../modules/gke"
+  project_id           = var.project_id
+  region               = var.region
+  cluster_name         = var.cluster_name
+  network              = var.network_self_link
+  subnetwork           = var.subnet_self_link
   node_service_account = var.node_service_account_email
 }
 
 module "argocd_app" {
   source = "../../modules/argocd"
 
-  name               = "demo-app-prod"
-  repo_url           = var.gitops_repo_url
-  path               = "gitops/prod"
-  target_revision    = var.gitops_revision
-  destination_server = module.gke.kubernetes_api_server
+  name                  = "demo-app-prod"
+  repo_url              = var.gitops_repo_url
+  path                  = "gitops/prod"
+  target_revision       = var.gitops_revision
+  destination_server    = module.gke.kubernetes_api_server
   destination_namespace = "default"
-  value_files        = ["values-prod.yaml"]
+  value_files           = ["values-prod.yaml"]
 }

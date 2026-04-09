@@ -35,20 +35,20 @@ module "env_project" {
   project_id      = var.project_id
   org_id          = var.org_id
   billing_account = var.billing_account
-  services        = {
-    "compute.googleapis.com"       = true
-    "container.googleapis.com"     = true
+  services = {
+    "compute.googleapis.com"          = true
+    "container.googleapis.com"        = true
     "artifactregistry.googleapis.com" = true
-    "iam.googleapis.com"           = true
+    "iam.googleapis.com"              = true
   }
 }
 
 // Attach environment project to shared VPC
 module "shared_vpc_attachment" {
-  source                  = "../modules/shared_vpc_attachment"
-  host_project_id         = var.host_project_id
-  service_project_id      = var.project_id
-  service_project_number  = var.service_project_number
+  source                 = "../modules/shared_vpc_attachment"
+  host_project_id        = var.host_project_id
+  service_project_id     = var.project_id
+  service_project_number = var.service_project_number
 }
 
 // Create artifact registry in environment project
@@ -61,23 +61,23 @@ module "artifact" {
 
 // Create GCE instance in environment project
 module "gce" {
-  source               = "../modules/gce"
-  project_id           = var.project_id
-  environment          = var.environment
-  instance_name        = var.instance_name
-  machine_type         = var.machine_type
-  zone                 = var.zone
-  boot_disk_image      = var.boot_disk_image
-  boot_disk_size_gb    = var.boot_disk_size_gb
-  boot_disk_type       = var.boot_disk_type
-  network              = var.network_self_link
-  subnetwork           = var.subnet_self_link
-  enable_public_ip     = var.enable_public_ip
+  source                = "../modules/gce"
+  project_id            = var.project_id
+  environment           = var.environment
+  instance_name         = var.instance_name
+  machine_type          = var.machine_type
+  zone                  = var.zone
+  boot_disk_image       = var.boot_disk_image
+  boot_disk_size_gb     = var.boot_disk_size_gb
+  boot_disk_type        = var.boot_disk_type
+  network               = var.network_self_link
+  subnetwork            = var.subnet_self_link
+  enable_public_ip      = var.enable_public_ip
   service_account_email = var.node_service_account_email
-  labels               = var.vm_labels
-  metadata             = var.vm_metadata
-  startup_script       = var.startup_script
-  preemptible          = var.preemptible
+  labels                = var.vm_labels
+  metadata              = var.vm_metadata
+  startup_script        = var.startup_script
+  preemptible           = var.preemptible
 
   depends_on = [module.shared_vpc_attachment]
 }
@@ -91,7 +91,7 @@ module "gce" {
 #   network            = var.network_self_link
 #   subnetwork         = var.subnet_self_link
 #   node_service_account = var.node_service_account_email
-  
+
 #   depends_on = [module.shared_vpc_attachment]
 # }
 
